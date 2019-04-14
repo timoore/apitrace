@@ -645,9 +645,14 @@ getTexImageMSAA(GLenum target, GLenum format, GLenum type,
     }
 
     glViewport(0, 0, desc.width, viewport_height);
+    GLint posAttribIndex = glGetAttribLocation(prog.ID(), "Position");
+    GLint savedBufferBinding;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &savedBufferBinding);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo.ID());
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertArray), vertArray, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(posAttribIndex, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, savedBufferBinding);
+    glEnableVertexAttribArray(posAttribIndex);
 
     glTexImage2D(GL_TEXTURE_2D, 0, desc.internalFormat, desc.width, viewport_height, 0, format, type, NULL);
 
@@ -684,7 +689,7 @@ getTexImageMSAA(GLenum target, GLenum format, GLenum type,
 exit_clean:
     // Put back state
     glUseProgram(savedProgram);
-    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(posAttribIndex);
     glViewport(savedViewport[0],savedViewport[1],savedViewport[2],savedViewport[3]);
 
     return;
